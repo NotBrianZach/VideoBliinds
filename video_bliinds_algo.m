@@ -2,7 +2,7 @@
 %% Compute Video BLIINDS Features
 load('movieFrames.mat');
 %load('frames_modelparameters.mat');
-niqe_features = compute_niqe_features(initFrames);
+niqe_features = compute_niqe_features(squeeze(initFrames));
 dt_dc_measure1 = temporal_dc_variation_feature_extraction(initFrames);
 [dt_dc_measure2 geo_ratio_features] = NSS_spectral_ratios_feature_extraction(initFrames);
 [mean_Coh10x10 G] = motion_feature_extraction(initFrames);

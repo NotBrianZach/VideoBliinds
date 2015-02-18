@@ -28,6 +28,7 @@ featnum      = 18;
 if(size(im,3)==3)
 im               = rgb2gray(im);
 end
+disp('hi');
 
 im               = double(im);                
 [row col]        = size(im);

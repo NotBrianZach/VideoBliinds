@@ -7,7 +7,7 @@ blocksizerow    = 96;
 blocksizecol    = 96;
 blockrowoverlap = 0;
 blockcoloverlap = 0;
-size(frames)
+size(frames,3)
  
 for fr = 6 : size(frames,3)-5
     fr
