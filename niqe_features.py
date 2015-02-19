@@ -50,6 +50,7 @@ def extract_ggd_features(imdata):
 	nr_gam = 1/prec_gammas
 	sigma_sq = np.average(imdata**2)
 	E = np.average(np.abs(imdata))
+    
 	rho = sigma_sq/E**2
 	pos = np.argmin(np.abs(nr_gam - rho));
 	return gamma_range[pos], np.sqrt(sigma_sq)
