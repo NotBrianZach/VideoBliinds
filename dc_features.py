@@ -1,5 +1,5 @@
-%% Computing the DC temporal variation
-%% feature a.k.a. the DC feature
+# Computing the DC temporal variation
+# feature a.k.a. the DC feature
 import os
 import sys
 import numpy as np
