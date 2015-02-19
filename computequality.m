@@ -85,6 +85,8 @@ distparam        = feat;
 mu_distparam     = nanmean(distparam);
 cov_distparam    = nancov(distparam);
 
+cov_distparam(isnan(cov_distparam))=0;
+mu_distparam(isnan(mu_distparam))=0;
 %cov_prisparam
 %cov_distparam
 % Compute quality
