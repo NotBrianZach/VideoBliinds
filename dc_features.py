@@ -75,7 +75,9 @@ def temporal_dc_variation_feature_extraction(frames):
 #h=fspecial('gaussian',mblock);
 
 mblock = 16;
-h=fspecial(1,mblock);
+h=fspecial(8,.5); #our filter will operate on 17 blocks at a time I think 8 + center + 8
+#in the matlab they used a 16 block filter
+
 
 
 # for x=1:size(frames,3)-1
@@ -91,16 +93,65 @@ for x in xrange(frames.length + 2):#xrange is inclusive at beginning, exclusive 
     print x
     imgP = double(frames[x+1])
     imgI = double(frames[x])
-    [motion_vects16x16[x] temp] = motionEstNTSS(imgP,imgI,mblock,7)
+    #motion_vects16x16[x] = [][]
+    motion_vects16x16 temp = motionEstNTSS(imgP,imgI,mblock,7)
     toc
     
     
 print frames[0].size
 print frames[0].shape
 print len(frames)
+    
+
+# mbsize = 16;
+# row = size(frames,1);
+# col = size(frames,2);
+
+# for x=1:size(frames,3)-1
+    # x;
+    # mbCount = 1;
+    # for i = 1 :mbsize : row-mbsize+1
+        # for j = 1 :mbsize : col-mbsize+1
+            # dct_motion_comp_diff(i:i+mbsize-1,j:j+mbsize-1,x) = dct2(frames(i:i+mbsize-1,j:j+mbsize-1,x+1)-frames(i+motion_vects16x16(1,mbCount,x):i+mbsize-1+motion_vects16x16(1,mbCount,x),j+motion_vects16x16(2,mbCount,x):j+mbsize-1+motion_vects16x16(2,mbCount,x),x));
+            # mbCount = mbCount+1;
+        # end
+    # end
+# end
+
+
+
+# for i = 1:size(frames,3)-1
+    # temp = im2col(dct_motion_comp_diff(:,:,i),[16,16],'distinct');
+    # std_dc(i) = std(temp(1,:));
+# end
+# clear *motion*
+
+
+
+# for i = 1:length(std_dc)-1
+    # dt_dc_temp(i) = abs(std_dc(i+1)-std_dc(i));
+
+# end
+
+# dt_dc_measure1 = mean(dt_dc_temp);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def motionEstNTSS(imgP, imgI,mbSize,p):
-    
+    return 5, 3
 # % Computes motion vectors using *NEW* Three Step Search method
 # %
 # % Based on the paper by R. Li, b. Zeng, and M. L. Liou
@@ -123,6 +174,7 @@ def motionEstNTSS(imgP, imgI,mbSize,p):
 # function [motionVect, NTSScomputations] = motionEstNTSS(imgP, imgI, mbSize, p)
 
 # [row col] = size(imgI);
+[row col] = [
 
 # vectors = zeros(2,row*col/mbSize^2);
 # costs = ones(3, 3) * 65537;
@@ -358,39 +410,17 @@ def motionEstNTSS(imgP, imgI,mbSize,p):
 
     
 
-#for x in xrange(frames.size-1)
-
-# mbsize = 16;
-# row = size(frames,1);
-# col = size(frames,2);
-
-# for x=1:size(frames,3)-1
-    # x;
-    # mbCount = 1;
-    # for i = 1 :mbsize : row-mbsize+1
-        # for j = 1 :mbsize : col-mbsize+1
-            # dct_motion_comp_diff(i:i+mbsize-1,j:j+mbsize-1,x) = dct2(frames(i:i+mbsize-1,j:j+mbsize-1,x+1)-frames(i+motion_vects16x16(1,mbCount,x):i+mbsize-1+motion_vects16x16(1,mbCount,x),j+motion_vects16x16(2,mbCount,x):j+mbsize-1+motion_vects16x16(2,mbCount,x),x));
-            # mbCount = mbCount+1;
-        # end
-    # end
-# end
+    
 
 
 
-# for i = 1:size(frames,3)-1
-    # temp = im2col(dct_motion_comp_diff(:,:,i),[16,16],'distinct');
-    # std_dc(i) = std(temp(1,:));
-# end
-# clear *motion*
 
 
 
-# for i = 1:length(std_dc)-1
-    # dt_dc_temp(i) = abs(std_dc(i+1)-std_dc(i));
 
-# end
 
-# dt_dc_measure1 = mean(dt_dc_temp);
+
+
 
 # def nss_spectral_ratios_feature_extraction(frames):
 # '''
