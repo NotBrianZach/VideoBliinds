@@ -88,15 +88,21 @@ h=fspecial(8,.5); #our filter will operate on 17 blocks at a time I think 8 + ce
     # [motion_vects16x16(:,:,x) temp] = motionEstNTSS(imgP,imgI,mblock,7);
     # toc
 # end
+
+
+def motionEstNTSS(imgP, imgI,mbSize,p):
+    return 5, 3
+
 motion_vects16x16 = []
-for x in xrange(frames.length + 2):#xrange is inclusive at beginning, exclusive at end
+for x in xrange(len(frames) - 1):#xrange is inclusive at beginning, exclusive at end
     print x
-    imgP = double(frames[x+1])
-    imgI = double(frames[x])
+    # imgP = double(frames[x+1])
+    # imgI = double(frames[x])
+    imgP = frames[x+1]
+    imgI = frames[x]
     #motion_vects16x16[x] = [][]
-    motion_vects16x16 temp = motionEstNTSS(imgP,imgI,mblock,7)
-    toc
-    
+    motion_vects16x16, temp = motionEstNTSS(imgP,imgI,mblock,7)
+    #toc
     
 print frames[0].size
 print frames[0].shape
@@ -140,16 +146,6 @@ print len(frames)
 
 
 
-
-
-
-
-
-
-
-
-
-
 def motionEstNTSS(imgP, imgI,mbSize,p):
     return 5, 3
 # % Computes motion vectors using *NEW* Three Step Search method
@@ -174,7 +170,7 @@ def motionEstNTSS(imgP, imgI,mbSize,p):
 # function [motionVect, NTSScomputations] = motionEstNTSS(imgP, imgI, mbSize, p)
 
 # [row col] = size(imgI);
-[row col] = [
+#[row col] = [
 
 # vectors = zeros(2,row*col/mbSize^2);
 # costs = ones(3, 3) * 65537;
