@@ -24,5 +24,5 @@ system('predictR.r')
 
 %% Reading data from a file
  
-predicted_dmos=textread('predicted_dmos.txt');
+%predicted_dmos=textread('predicted_dmos.txt');
 
