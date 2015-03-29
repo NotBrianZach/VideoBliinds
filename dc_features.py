@@ -3,7 +3,11 @@
 import os
 import sys
 import numpy as np
-import scipy.ndimage
+from numpy import zeros
+from numpy import ones
+from numpy import floor
+import math
+#import scipy.ndimage
 import scipy.signal
 import scipy.io
 from time import clock, time
@@ -16,6 +20,7 @@ import skimage
 from skimage.feature import hog
 from skimage import data, color, exposure
 from sklearn.externals import joblib
+from scipy.fftpack import dct
 
 #current path to image files:"C:/Users/Zach/Desktop/movieFrames/frames_2003.77.00000074.bmp"
 #path to niqe.py "C:/Users/Zach/Desktop/VideoBLIINDS_Code_MicheleSaad/niqe_features.py"
@@ -65,6 +70,7 @@ def fspecial(lw, sigma):#fspecial
     return weights
 frames = [skimage.io.imread("C:/Users/Zach/Desktop/movieFrames/frames_2003.77.00000075.bmp", as_grey=1)]
 frames.append(skimage.io.imread("C:/Users/Zach/Desktop/movieFrames/frames_2003.77.00000076.bmp", as_grey=1))
+
 def temporal_dc_variation_feature_extraction(frames):
     '''
     computes dt_dc_measure 1
@@ -74,8 +80,8 @@ def temporal_dc_variation_feature_extraction(frames):
 #mblock = 16;
 #h=fspecial('gaussian',mblock);
 
-mblock = 16;
-h=fspecial(8,.5); #our filter will operate on 17 blocks at a time I think 8 + center + 8
+mblock = 16
+h=fspecial(8,.5) #our filter will operate on 17 blocks at a time I think 8 + center + 8
 #in the matlab they used a 16 block filter
 
 
@@ -90,23 +96,23 @@ h=fspecial(8,.5); #our filter will operate on 17 blocks at a time I think 8 + ce
 # end
 
 
-def motionEstNTSS(imgP, imgI,mbSize,p):
-    return 5, 3
+# def motionEstNTSS(imgP, imgI,mbSize,p):
+    # return 5, 3
 
 motion_vects16x16 = []
-for x in xrange(len(frames) - 1):#xrange is inclusive at beginning, exclusive at end
-    print x
+# for x in xrange(len(frames) - 1):#xrange is inclusive at beginning, exclusive at end
+    # print x
     # imgP = double(frames[x+1])
     # imgI = double(frames[x])
-    imgP = frames[x+1]
-    imgI = frames[x]
-    #motion_vects16x16[x] = [][]
-    motion_vects16x16, temp = motionEstNTSS(imgP,imgI,mblock,7)
-    #toc
+    # imgP = frames[x+1]
+    # imgI = frames[x]
+    # motion_vects16x16[x] = [][]
+    # motion_vects16x16, temp = motionEstNTSS(imgP,imgI,mblock,7)
+    # toc
     
-print frames[0].size
-print frames[0].shape
-print len(frames)
+# print frames[0].size
+# print frames[0].shape
+# print len(frames)
     
 
 # mbsize = 16;
@@ -157,12 +163,12 @@ def costFuncMAD(currentBlk,refBlk, n):
 # % Written by Aroh Barjatya
 
     # err = 0;
-    err = 0;
+    err = 0
     # for i = 1:n
-    for i in xrange(1,n+1):
+    for i in xrange(0,n - 1):
         # for j = 1:n
-        for j in xrange(1,n+1):
-            err = err + abs((currentBlk(i,j) - refBlk(i,j)))
+        for j in xrange(0,n - 1):
+            err = err + abs((currentBlk[i,j] - refBlk[i,j]))
             # err = err + abs((currentBlk(i,j) - refBlk(i,j)));
         # end
     # end
@@ -181,7 +187,7 @@ def costFuncMAD(currentBlk,refBlk, n):
 # % Written by Aroh Barjatya
 
 #function [dx, dy, min] = minCost(costs)
-def minCosts(costs):
+def minCost(costs):
     # [row, col] = size(costs);
     row, col = costs.shape
 
@@ -236,12 +242,18 @@ def motionEstNTSS(imgP, imgI,mbSize,p):
 
 # [row col] = size(imgI);
     row, col = imgI.shape
-
+    print "row, col"
+    print row
+    print col
+    row1, col1 = imgP.shape
+    print "row1, col1"
+    print row1
+    print col1
 # vectors = zeros(2,row*col/mbSize^2);
 # costs = ones(3, 3) * 65537;
 
-    vectors = zeros((2,row*col/mbSize^2),Float);
-    costs = ones((3, 3), Float) * 65537;
+    vectors = zeros((2,row*col/mbSize^2),float)
+    costs = ones((3, 3), float) * 65537
 
 
 # % we now take effectively log to the base 2 of p
@@ -251,14 +263,14 @@ def motionEstNTSS(imgP, imgI,mbSize,p):
 # stepMax = 2^(L-1);
 
 # computations = 0;
-    L = floor(math.log10(p+1)/ math.log10(2));   
-    stepMax = power(2,(L-1));
+    L = floor(math.log10(p+1)/ math.log10(2))
+    stepMax = pow(2,(L-1))
 
     computations = 0;
 
 # % we start off from the top left of the image
 # % we will walk in steps of mbSize
-# % for every marcoblock that we look at we will look for
+# % for every macroblock that we look at we will look for
 # % a close match p pixels on the left, right, top and bottom of it
 
 # mbCount = 1;
@@ -266,8 +278,8 @@ def motionEstNTSS(imgP, imgI,mbSize,p):
     # for j = 1 : mbSize : col-mbSize+1
     mbCount = 1;
 
-    for i in range(1,mbSize, row-mbSize+1):
-        for j in range(1,mbSize, col-mbSize+1):
+    for i in range(0, mbSize, row-mbSize):
+        for j in range(0, mbSize, col-mbSize):
         
         # % the NEW three step search starts
    
@@ -297,9 +309,12 @@ def motionEstNTSS(imgP, imgI,mbSize,p):
                                     # imgI(i:i+mbSize-1,j:j+mbSize-1),mbSize);
         # stepSize = stepMax; 
         # computations = computations + 1;
+            print i
+            print mbSize
+            print j
             costs = costFuncMAD(imgP[i:i+mbSize-1,j:j+mbSize-1],
-                                    imgI[i:i+mbSize-1,j:j+mbSize-1],mbSize)
-            stepSize = stepMax
+                                    imgI[i:i+mbSize-1,j:j+mbSize-1], mbSize)
+            stepSize = int(stepMax)
             computations = computations + 1
 
         # % This is the calculation of the outer 8 points
@@ -335,18 +350,18 @@ def motionEstNTSS(imgP, imgI,mbSize,p):
                 for n in xrange(-stepSize,stepSize,stepSize):
                     refBlkVer = y + m   #% row/Vert co-ordinate for ref block
                     refBlkHor = x + n  # % col/Horizontal co-ordinate
-                    if ( refBlkVer < 1 || refBlkVer+mbSize-1 > row \
-                         || refBlkHor < 1 || refBlkHor+mbSize-1 > col):
+                    if ( refBlkVer < 1 or refBlkVer+mbSize-1 > row \
+                         or refBlkHor < 1 or refBlkHor+mbSize-1 > col):
                          continue
                     # end
 
                     costRow = m/stepSize + 2
                     costCol = n/stepSize + 2
-                    if (costRow == 2 && costCol == 2):
+                    if (costRow == 2 and costCol == 2):
                         continue
                     # end
                     costs[costRow, costCol] = costFuncMAD(imgP[i:i+mbSize-1,j:j+mbSize-1], \
-                        imgI(refBlkVer:refBlkVer+mbSize-1, refBlkHor:refBlkHor+mbSize-1), mbSize);
+                        imgI[refBlkVer:refBlkVer+mbSize-1, refBlkHor:refBlkHor+mbSize-1], mbSize);
                     computations = computations + 1
                 # end
             # end
@@ -392,55 +407,71 @@ def motionEstNTSS(imgP, imgI,mbSize,p):
         
         # % Now find the costs at 8 points right next to the center point
         # % (x,y) still points to the center
-        
-        stepSize = 1
-        for m in xrange(-stepSize, stepSize, stepSize):        
-            for n in xrange(-stepSize, stepSize, stepSize):
-                refBlkVer = y + m  # % row/Vert co-ordinate for ref block
-                refBlkHor = x + n  # % col/Horizontal co-ordinate
-                if ( refBlkVer < 1 || refBlkVer+mbSize-1 > row \
-                     || refBlkHor < 1 || refBlkHor+mbSize-1 > col)
-                     continue
-                #end
-
-                costRow = m/stepSize + 2
-                costCol = n/stepSize + 2
-                if (costRow == 2 && costCol == 2):
-                    continue
-                #end
-                costs[costRow, costCol] = costFuncMAD(imgP[i:i+mbSize-1,j:j+mbSize-1], \
-                    imgI[refBlkVer:refBlkVer+mbSize-1, refBlkHor:refBlkHor+mbSize-1], mbSize);
-                computations = computations + 1;
-            end
-        end
-        
-        
-        # % now find the minimum amongst this
-        
-        # [dx, dy, min2] = minCost(costs);      % finds which macroblock in imgI gave us min Cost
             
-              
-        # % Find the exact co-ordinates of this point
+            stepSize = 1
+            for m in xrange(-stepSize, stepSize, stepSize):        
+                for n in xrange(-stepSize, stepSize, stepSize):
+                    refBlkVer = y + m  # % row/Vert co-ordinate for ref block
+                    refBlkHor = x + n  # % col/Horizontal co-ordinate
+                    if ( refBlkVer < 1 or refBlkVer+mbSize-1 > row \
+                         or refBlkHor < 1 or refBlkHor+mbSize-1 > col):
+                         continue
+                    #end
 
-        # x2 = x + (dx-2)*stepSize;
-        # y2 = y + (dy-2)*stepSize;
-        
-        # % the only place x1 == x2 and y1 == y2 will take place will be the
-        # % center of the search region
-        
-        # if (x1 == x2 && y1 == y2)
-            # % then x and y still remain pointing to j and i;
-            # NTSSFlag = -1; % this flag will take us out of any more computations 
-        # elseif (min2 <= min1)
-            # x = x2;
-            # y = y2;
-            # NTSSFlag = 1; % this flag signifies we are going to go into NTSS mode
-        # else
-            # x = x1;
-            # y = y1;
-            # NTSSFlag = 0; % This value of flag says, we go into normal TSS
-        # end
-        
+                    costRow = m/stepSize + 2
+                    costCol = n/stepSize + 2
+                    if (costRow == 2 and costCol == 2):
+                        continue
+                    #end
+                    costs[costRow, costCol] = costFuncMAD(imgP[i:i+mbSize-1,j:j+mbSize-1], \
+                        imgI[refBlkVer:refBlkVer+mbSize-1, refBlkHor:refBlkHor+mbSize-1], mbSize)
+                    computations = computations + 1
+            
+            
+            # % now find the minimum amongst this
+            
+            # [dx, dy, min2] = minCost(costs);      % finds which macroblock in imgI gave us min Cost
+            dx, dy, min2 = minCost(costs)     # % finds which macroblock in imgI gave us min Cost
+
+                  
+            # % Find the exact co-ordinates of this point
+
+            # x2 = x + (dx-2)*stepSize;
+            # y2 = y + (dy-2)*stepSize;
+            x2 = x + (dx-2)*stepSize
+            y2 = y + (dy-2)*stepSize
+            
+            # % the only place x1 == x2 and y1 == y2 will take place will be the
+            # % center of the search region
+            
+            # if (x1 == x2 && y1 == y2)
+                # % then x and y still remain pointing to j and i;
+                # NTSSFlag = -1; % this flag will take us out of any more computations 
+            # elseif (min2 <= min1)
+                # x = x2;
+                # y = y2;
+                # NTSSFlag = 1; % this flag signifies we are going to go into NTSS mode
+            # else
+                # x = x1;
+                # y = y1;
+                # NTSSFlag = 0; % This value of flag says, we go into normal TSS
+            # end
+            
+            
+            # % the only place x1 == x2 and y1 == y2 will take place will be the
+            # % center of the search region
+            
+            if (x1 == x2 and y1 == y2):
+                #% then x and y still remain pointing to j and i;
+                NTSSFlag = -1# % this flag will take us out of any more computations 
+            elif (min2 <= min1):
+                x = x2
+                y = y2
+                NTSSFlag = 1 #% this flag signifies we are going to go into NTSS mode
+            else:
+                x = x1
+                y = y1
+                NTSSFlag = 0 #% This value of flag says, we go into normal TSS
         
         # if (NTSSFlag == 1)
             # % Now in order to make sure that we dont calcylate the same
@@ -533,26 +564,186 @@ def motionEstNTSS(imgP, imgI,mbSize,p):
         # mbCount = mbCount + 1;
         # costs = ones(3,3) * 65537;
     # end
-    return 5, 3
+    
+        if (NTSSFlag == 1):
+                # % Now in order to make sure that we dont calculate the same
+                # % points again which were in the initial center window we take
+                # % care as follows
+                
+                costs = ones((3,3), Float) * 65537
+                costs[2,2] = min2
+                stepSize = 1
+                for m in xrange(-stepSize, stepSize, stepSize):
+                    for n in xrange(-stepSize, stepSize, stepSize):
+                        refBlkVer = y + m  # % row/Vert co-ordinate for ref block
+                        refBlkHor = x + n  # % col/Horizontal co-ordinate
+                        if ( refBlkVer < 1 or refBlkVer + mbSize - 1 > row \
+                               or refBlkHor < 1 or refBlkHor + mbSize - 1 > col):
+                            continue
+                        
+                        if ( (refBlkVer >= i - 1  and refBlkVer <= i + 1) \
+                                and (refBlkHor >= j - 1  and refBlkHor <= j + 1) ):
+                            continue
+                      
+                        
+                        costRow = m/stepSize + 2
+                        costCol = n/stepSize + 2
+                        if (costRow == 2 and costCol == 2):
+                            continue
+                        
+                        costs[costRow, costCol] = costFuncMAD(imgP[i:i+mbSize-1,j:j+mbSize-1], \
+                             imgI[refBlkVer:refBlkVer+mbSize-1, refBlkHor:refBlkHor+mbSize-1], mbSize)
+                        computations = computations + 1;
+
+                # % now find the minimum amongst this
+            
+                dx, dy, min2 = minCost(costs)  #    % finds which macroblock in imgI gave us min Cost
+                
+                # % Find the exact co-ordinates of this point and stop
+
+                x = x + (dx-2)*stepSize
+                y = y + (dy-2)*stepSize           
+                
+        elif (NTSSFlag == 0):
+                # % this is when we are going about doing normal TSS business
+                costs = ones((3,3), Float) * 65537;
+                costs[2,2] = min1
+                stepSize = stepMax / 2
+                while(stepSize >= 1):
+                    for m in xrange(-stepSize, stepSize, stepSize):
+                        for n in xrange(-stepSize, stepSize, stepSize):
+                            refBlkVer = y + m   #% row/Vert co-ordinate for ref block
+                            refBlkHor = x + n   #% col/Horizontal co-ordinate
+                            if ( refBlkVer < 1 or refBlkVer+mbSize-1 > row \
+                                or refBlkHor < 1 or refBlkHor+mbSize-1 > col):
+                                continue
+
+                            costRow = m/stepSize + 2;
+                            costCol = n/stepSize + 2;
+                            if (costRow == 2 and costCol == 2):
+                                continue
+                            costs[costRow, costCol] = costFuncMAD(imgP[i:i+mbSize-1,j:j+mbSize-1], \
+                                    imgI[refBlkVer:refBlkVer+mbSize-1, refBlkHor:refBlkHor+mbSize-1], mbSize)
+                            computations = computations + 1
+            
+                    # % Now we find the vector where the cost is minimum
+                    # % and store it ... this is what will be passed back.
+            
+                    dx, dy, min = minCost(costs) #    % finds which macroblock in imgI gave us min Cost
+
+                    # % shift the root for search window to new minima point
+
+                    x = x + (dx-2)*stepSize
+                    y = y + (dy-2)*stepSize
+                
+                    stepSize = stepSize / 2
+                    costs[2,2] = costs(dy,dx)
+
+        vectors[1,mbCount] = y - i  #  % row co-ordinate for the vector
+        vectors[2,mbCount] = x - j  #  % col co-ordinate for the vector            
+        mbCount = mbCount + 1
+        costs = ones((3,3), Float) * 65537
+    motionVect = vectors
+    NTSScomputations = computations/(mbCount - 1)
+    return motionVect, NTSSComputations
+
+
+ #COMPUTING DC COEFFICIENT CONTINUED NOW THAT WE HAVE THE FUNCTION WE NEED
+    
+    
+motion_vects16x16 = []
+for x in xrange(len(frames) - 1):#xrange is inclusive at beginning, exclusive at end
+    print x
+    # imgP = double(frames[x+1])
+    # imgI = double(frames[x])
+    imgP = frames[x+1]
+    imgI = frames[x]
+    #motion_vects16x16[x] = [][]
+    motion_vects16x16, temp = motionEstNTSS(imgP,imgI,mblock,7)
+    #toc
+    
+print frames[0].size
+print frames[0].shape
+print len(frames)
+    
+
+    
+    
+# mbsize = 16;
+# row = size(frames,1);
+# col = size(frames,2);
+
+mbsize = 16;
+row = frames.shape[0];
+col = frames.shape[1];
+
+# for x=1:size(frames,3)-1
+    # x;
+    # mbCount = 1;
+    # for i = 1 :mbsize : row-mbsize+1
+        # for j = 1 :mbsize : col-mbsize+1
+            # dct_motion_comp_diff(i:i+mbsize-1,j:j+mbsize-1,x) = dct2(frames(i:i+mbsize-1,j:j+mbsize-1,x+1)-frames(i+motion_vects16x16(1,mbCount,x):i+mbsize-1+motion_vects16x16(1,mbCount,x),j+motion_vects16x16(2,mbCount,x):j+mbsize-1+motion_vects16x16(2,mbCount,x),x));
+            # mbCount = mbCount+1;
+        # end
+    # end
+# end
+
+for x in xrange(1,frames.shape[2]):
+    print x
+    mbCount = 1
+    for i in xrange(1,mbsize + 1,row-mbsize+1):
+        for j in xrange(1,mbsize + 1,col-mbsize+1):
+            dct_motion_comp_diff[i:i+mbsize-1,j:j+mbsize-1,x] = dct(dct(numpy.pad(frames[i:i+mbsize-1,j:j+mbsize-1,x+1]-frames[i+motion_vects16x16[1,mbCount,x]:i+mbsize-1+motion_vects16x16[1,mbCount,x],j+motion_vects16x16[2,mbCount,x]:j+mbsize-1+motion_vects16x16[2,mbCount,x],x]).T).T);
+            mbCount = mbCount + 1
+        end
+    end
+end
+
+# for i = 1:size(frames,3)-1
+    # temp = im2col(dct_motion_comp_diff(:,:,i),[16,16],'distinct');
+    # std_dc(i) = std(temp(1,:));
+# end
+# clear *motion*
+
+# for i = 1:length(std_dc)-1
+    # dt_dc_temp(i) = abs(std_dc(i+1)-std_dc(i));
 
 # end
 
-# motionVect = vectors;
-# NTSScomputations = computations/(mbCount - 1);
+#dt_dc_measure1 = mean(dt_dc_temp);
 
+def im2col(Im, block, style='sliding'):
+    """block = (patchsize, patchsize)
+        first do sliding
+    """
+    bx, by = block
+    Imx, Imy = Im.shape
+    Imcol = []
+    for j in range(0, Imy):
+        for i in range(0, Imx):
+            if (i+bx <= Imx) and (j+by <= Imy):
+                Imcol.append(Im[i:i+bx, j:j+by].T.reshape(bx*by))
+            else:
+                break
+    return np.asarray(Imcol).T
+
+
+for i in xrange(1,size(frames,3)):
+    temp = im2col(dct_motion_comp_diff[:,:,i],(16,16),'distinct');
+    std_dc[i] = std[temp[1,:]];
+
+for i in xrange(1,len(std_dc)):
+    dt_dc_temp[i] = abs(std_dc[i+1]-std_dc[i]);
+
+dt_dc_measure1 = mean(dt_dc_temp);    
     
-
     
-
-
-
-
-
-
-
-
-
-
+    
+    
+    
+    
+    
+    
 
 # def nss_spectral_ratios_feature_extraction(frames):
 # '''
