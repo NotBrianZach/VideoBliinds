@@ -68,8 +68,17 @@ def fspecial(lw, sigma):#fspecial
     for ii in range(2 * lw + 1):
         weights[ii] /= sum
     return weights
-frames = [skimage.io.imread("C:/Users/Zach/Desktop/movieFrames/frames_2003.77.00000075.bmp", as_grey=1)]
-frames.append(skimage.io.imread("C:/Users/Zach/Desktop/movieFrames/frames_2003.77.00000076.bmp", as_grey=1))
+#frames = [skimage.io.imread("C:/Users/Zach/Desktop/movieFrames/frames_2003.77.00000075.bmp", as_grey=1)]
+#frames.append(skimage.io.imread("C:/Users/Zach/Desktop/movieFrames/frames_2003.77.00000076.bmp", as_grey=1))
+#frames = [skimage.io.imread("/Users/brian/Desktop/Abe.png", as_grey=1)]
+f1 = np.array(skimage.io.imread("/Users/brian/Desktop/Abe.png", as_grey=1))
+#frames.append(skimage.io.imread("/Users/brian/Desktop/alien2.jpg", as_grey=1))
+f2 = np.array(skimage.io.imread("/Users/brian/Desktop/Abe.png", as_grey=1))
+f1 = np.expand_dims(f1,axis=3)
+f2 = np.expand_dims(f2,axis=3)
+print(f1.shape)
+frames = np.concatenate((f1,f2),axis=2)
+print(frames.shape)
 
 def temporal_dc_variation_feature_extraction(frames):
     '''
@@ -83,8 +92,6 @@ def temporal_dc_variation_feature_extraction(frames):
 mblock = 16
 h=fspecial(8,.5) #our filter will operate on 17 blocks at a time I think 8 + center + 8
 #in the matlab they used a 16 block filter
-
-
 
 # for x=1:size(frames,3)-1
     # x
@@ -660,12 +667,15 @@ def motionEstNTSS(imgP, imgI,mbSize,p):
     
     
 motion_vects16x16 = []
-for x in xrange(len(frames) - 1):#xrange is inclusive at beginning, exclusive at end
+for x in xrange(frames.shape[2] - 1):#xrange is inclusive at beginning, exclusive at end
     print x
+    print "HOW MANY FRAMES WE GOT?"
+    print frames.shape[2]
+    print frames[:,:,1]
     # imgP = double(frames[x+1])
     # imgI = double(frames[x])
-    imgP = frames[x+1]
-    imgI = frames[x]
+    imgP = frames[:,:,x+1]
+    imgI = frames[:,:,x]
     #motion_vects16x16[x] = [][]
     motion_vects16x16, temp = motionEstNTSS(imgP,imgI,mblock,7)
     #toc
@@ -701,7 +711,7 @@ for x in xrange(0,frames.shape[2]):
     mbCount = 1
     for i in xrange(0,mbsize,row-mbsize + 1):
         for j in xrange(0,mbsize,col-mbsize + 1):
-            dct_motion_comp_diff[i:i+mbsize-1,j:j+mbsize-1,x] = dct(dct(numpy.pad(frames[i:i+mbsize-1,j:j+mbsize-1,x+1]-frames[i+motion_vects16x16[1,mbCount,x]:i+mbsize-1+motion_vects16x16[1,mbCount,x],j+motion_vects16x16[2,mbCount,x]:j+mbsize-1+motion_vects16x16[2,mbCount,x],x]).T).T);
+            dct_motion_comp_diff[i:i+mbsize-1,j:j+mbsize-1,x] = dct(dct(np.pad(frames[i:i+mbsize-1,j:j+mbsize-1,x+1]-frames[i+motion_vects16x16[1,mbCount,x]:i+mbsize-1+motion_vects16x16[1,mbCount,x],j+motion_vects16x16[2,mbCount,x]:j+mbsize-1+motion_vects16x16[2,mbCount,x],x]).T).T);
             mbCount = mbCount + 1
         end
     end
@@ -861,6 +871,7 @@ dt_dc_measure1 = mean(dt_dc_temp);
 # %%
 # %%
 # %%
+
 
 # for x = 1:size(dct_diff5x5,3)-1
     # dt_dc(x) = abs(mean(dct_diff5x5(1,:,x+1))-mean(dct_diff5x5(1,:,x)));

@@ -1,4 +1,3 @@
-
 %% Compute Video BLIINDS Features
 load('movieFrames.mat');
 %load('frames_modelparameters.mat');
