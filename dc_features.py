@@ -206,10 +206,10 @@ def minCost(costs):
             # end
         # end
     # end
-    for i in xrange(1,row+1):
-        for j in  xrange(1,col+1):
+    for i in xrange(0,row):
+        for j in  xrange(0,col):
             if (costs[i,j] < min):
-                min = costs(i,j)
+                min = costs[i,j]
                 dx = j 
                 dy = i
                 return min,dx,dy
@@ -312,8 +312,9 @@ def motionEstNTSS(imgP, imgI,mbSize,p):
             print i
             print mbSize
             print j
-            costs = costFuncMAD(imgP[i:i+mbSize-1,j:j+mbSize-1],
+            costs[1,1] = costFuncMAD(imgP[i:i+mbSize-1,j:j+mbSize-1],
                                     imgI[i:i+mbSize-1,j:j+mbSize-1], mbSize)
+            print costs
             stepSize = int(stepMax)
             computations = computations + 1
 
@@ -360,9 +361,15 @@ def motionEstNTSS(imgP, imgI,mbSize,p):
                     if (costRow == 2 and costCol == 2):
                         continue
                     # end
+                    print "costRow"
+                    print costRow
+                    print "costColumn"
+                    print costColumn
                     costs[costRow, costCol] = costFuncMAD(imgP[i:i+mbSize-1,j:j+mbSize-1], \
                         imgI[refBlkVer:refBlkVer+mbSize-1, refBlkHor:refBlkHor+mbSize-1], mbSize);
                     computations = computations + 1
+                    print costs
+
                 # end
             # end
         
@@ -423,6 +430,7 @@ def motionEstNTSS(imgP, imgI,mbSize,p):
                     if (costRow == 2 and costCol == 2):
                         continue
                     #end
+
                     costs[costRow, costCol] = costFuncMAD(imgP[i:i+mbSize-1,j:j+mbSize-1], \
                         imgI[refBlkVer:refBlkVer+mbSize-1, refBlkHor:refBlkHor+mbSize-1], mbSize)
                     computations = computations + 1
@@ -570,8 +578,8 @@ def motionEstNTSS(imgP, imgI,mbSize,p):
                 # % points again which were in the initial center window we take
                 # % care as follows
                 
-                costs = ones((3,3), Float) * 65537
-                costs[2,2] = min2
+                costs = ones((3,3), float) * 65537
+                costs[1,1] = min2
                 stepSize = 1
                 for m in xrange(-stepSize, stepSize, stepSize):
                     for n in xrange(-stepSize, stepSize, stepSize):
@@ -637,14 +645,14 @@ def motionEstNTSS(imgP, imgI,mbSize,p):
                     y = y + (dy-2)*stepSize
                 
                     stepSize = stepSize / 2
-                    costs[2,2] = costs(dy,dx)
+                    costs[1,1] = costs(dy,dx)
 
-        vectors[1,mbCount] = y - i  #  % row co-ordinate for the vector
-        vectors[2,mbCount] = x - j  #  % col co-ordinate for the vector            
+        vectors[0,mbCount] = y - i  #  % row co-ordinate for the vector
+        vectors[1,mbCount] = x - j  #  % col co-ordinate for the vector            
         mbCount = mbCount + 1
-        costs = ones((3,3), Float) * 65537
+        costs = ones((3,3), float) * 65537
     motionVect = vectors
-    NTSScomputations = computations/(mbCount - 1)
+    NTSSComputations = computations/(mbCount - 1)
     return motionVect, NTSSComputations
 
 
@@ -688,11 +696,11 @@ col = frames.shape[1];
     # end
 # end
 
-for x in xrange(1,frames.shape[2]):
+for x in xrange(0,frames.shape[2]):
     print x
     mbCount = 1
-    for i in xrange(1,mbsize + 1,row-mbsize+1):
-        for j in xrange(1,mbsize + 1,col-mbsize+1):
+    for i in xrange(0,mbsize,row-mbsize + 1):
+        for j in xrange(0,mbsize,col-mbsize + 1):
             dct_motion_comp_diff[i:i+mbsize-1,j:j+mbsize-1,x] = dct(dct(numpy.pad(frames[i:i+mbsize-1,j:j+mbsize-1,x+1]-frames[i+motion_vects16x16[1,mbCount,x]:i+mbsize-1+motion_vects16x16[1,mbCount,x],j+motion_vects16x16[2,mbCount,x]:j+mbsize-1+motion_vects16x16[2,mbCount,x],x]).T).T);
             mbCount = mbCount + 1
         end
