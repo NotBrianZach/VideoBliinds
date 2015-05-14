@@ -47,10 +47,14 @@ mblock = 16;
 h=fspecial('gaussian',mblock);
 
 for x=1:size(frames,3)-1
-    x
-    tic  
+   % x
+   % tic
     imgP = double(frames(:,:,x+1));
     imgI = double(frames(:,:,x));
+    'imgP'
+    size(imgP)
+    'imgI'
+    size(imgI)
     [motion_vects16x16(:,:,x) temp] = motionEstNTSS(imgP,imgI,mblock,7);
     toc
 end
@@ -65,6 +69,10 @@ for x=1:size(frames,3)-1
     mbCount = 1;
     for i = 1 :mbsize : row-mbsize+1
         for j = 1 :mbsize : col-mbsize+1
+%             'hi, frames'
+%             size(frames)
+%             'motion_vects'
+%             size(motion_vects16x16)
             dct_motion_comp_diff(i:i+mbsize-1,j:j+mbsize-1,x) = dct2(frames(i:i+mbsize-1,j:j+mbsize-1,x+1)-frames(i+motion_vects16x16(1,mbCount,x):i+mbsize-1+motion_vects16x16(1,mbCount,x),j+motion_vects16x16(2,mbCount,x):j+mbsize-1+motion_vects16x16(2,mbCount,x),x));
             mbCount = mbCount+1;
         end
@@ -83,7 +91,6 @@ clear *motion*
 
 for i = 1:length(std_dc)-1
     dt_dc_temp(i) = abs(std_dc(i+1)-std_dc(i));
-
 end
 1
 dt_dc_measure1 = mean(dt_dc_temp);

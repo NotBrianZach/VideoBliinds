@@ -1,5 +1,7 @@
 %% Compute Video BLIINDS Features
 load('movieFrames.mat');
+diary('/Users/brian/Desktop/Videobliinds/moutput')
+diary on
 %load('frames_modelparameters.mat');
 niqe_features = compute_niqe_features(squeeze(initFrames));
 dt_dc_measure1 = temporal_dc_variation_feature_extraction(initFrames);
@@ -14,7 +16,7 @@ features_test = [niqe_features log(1+dt_dc_measure1) log(1+dt_dc_measure2) log(1
     
 %%
 
-fid = fopen('features_test.txt', 'w+');
+fid =fopen('features_test.txt', 'w+');
 fprintf(fid,'%d ',features_test(1,1:end));
 fprintf(fid,'\n');
 fclose(fid);
@@ -24,4 +26,3 @@ system('predictR.r')
 %% Reading data from a file
  
 %predicted_dmos=textread('predicted_dmos.txt');
-

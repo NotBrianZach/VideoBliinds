@@ -19,19 +19,24 @@
 
 function [motionVect, NTSScomputations] = motionEstNTSS(imgP, imgI, mbSize, p)
 
-[row col] = size(imgI);
+[row col] = size(imgI);%right
 
-vectors = zeros(2,row*col/mbSize^2);
-costs = ones(3, 3) * 65537;
-
+vectors = zeros(2,row*col/mbSize^2);%right dimensions anyway
+% 'vectors'
+% size(vectors)
+%vectors
+costs = ones(3, 3) * 65537;%right
 
 % we now take effectively log to the base 2 of p
 % this will give us the number of steps required
 
-L = floor(log10(p+1)/log10(2));   
-stepMax = 2^(L-1);
-
-computations = 0;
+L = floor(log10(p+1)/log10(2));
+% 'L'
+% L
+stepMax = 2^(L-1);%right
+% 'stepMax'
+% stepMax
+computations = 0;%right
 
 % we start off from the top left of the image
 % we will walk in steps of mbSize
@@ -44,8 +49,6 @@ for i = 1 : mbSize : row-mbSize+1
         
         % the NEW three step search starts
 
-
-        
         x = j;
         y = i;
         
@@ -68,7 +71,9 @@ for i = 1 : mbSize : row-mbSize+1
         
         costs(2,2) = costFuncMAD(imgP(i:i+mbSize-1,j:j+mbSize-1), ...
                                     imgI(i:i+mbSize-1,j:j+mbSize-1),mbSize);
+
         stepSize = stepMax; 
+
         computations = computations + 1;
 
         % This is the calculation of the outer 8 points
@@ -79,19 +84,31 @@ for i = 1 : mbSize : row-mbSize+1
             for n = -stepSize : stepSize : stepSize
                 refBlkVer = y + m;   % row/Vert co-ordinate for ref block
                 refBlkHor = x + n;   % col/Horizontal co-ordinate
+                refBlkVer
+                y
+                m
+                refBlkHor
+                x
+                n
                 if ( refBlkVer < 1 || refBlkVer+mbSize-1 > row ...
                      || refBlkHor < 1 || refBlkHor+mbSize-1 > col)
+                     'continue1'
                      continue;
                 end
 
                 costRow = m/stepSize + 2;
                 costCol = n/stepSize + 2;
+                costRow
+                costCol
                 if (costRow == 2 && costCol == 2)
+                    'continue2'
                     continue
                 end
                 costs(costRow, costCol ) = costFuncMAD(imgP(i:i+mbSize-1,j:j+mbSize-1), ...
                     imgI(refBlkVer:refBlkVer+mbSize-1, refBlkHor:refBlkHor+mbSize-1), mbSize);
+                costs
                 computations = computations + 1;
+                computations
             end
         end
         
@@ -219,7 +236,7 @@ for i = 1 : mbSize : row-mbSize+1
                         if (costRow == 2 && costCol == 2)
                             continue
                         end
-                        costs(costRow, costCol ) = costFuncMAD(imgP(i:i+mbSize-1,j:j+mbSize-1), ...
+                        costs(costRow, costCol) = costFuncMAD(imgP(i:i+mbSize-1,j:j+mbSize-1), ...
                                 imgI(refBlkVer:refBlkVer+mbSize-1, refBlkHor:refBlkHor+mbSize-1), mbSize);
                         computations = computations + 1;
                     

@@ -1,8 +1,8 @@
 
-filenames = dir('C:\Users\Zach\Desktop\movieFrames\*.bmp'); %# get information of all .bmp files in work dir
+filenames = dir('/Users/brian/Desktop/VideoBliinds/*.bmp'); %# get information of all .bmp files in work dir
 n  = numel(filenames);    %# number of .bmp files
 
-% for i = 1:n
+% for i = 1:n   C:\Users\Zach\Desktop\movieFrames\*
 %     A = imread( filenames(i).name );
 % 
 %     %# gets full path, filename radical and extension
@@ -10,8 +10,9 @@ n  = numel(filenames);    %# number of .bmp files
 % 
 %     save([radical '.mat'], 'A');                          
 % end
-for i = 1:n/200
-    initFrames(:,:,i) = rgb2gray(imread( ['C:\Users\Zach\Desktop\movieFrames\' filenames(i).name] ));
+for i = 1:49%n %/200
+    %C:\Users\Zach\Desktop\movieFrames\
+    initFrames(:,:,i) = rgb2gray(imread( ['/Users/brian/Desktop/VideoBliinds/' filenames(i).name] ));
 
     %# gets full path, filename radical and extension
     [fpath radical ext] = fileparts( filenames(i).name ); 
