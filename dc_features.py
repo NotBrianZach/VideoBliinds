@@ -22,6 +22,31 @@ from skimage import data, color, exposure
 from sklearn.externals import joblib
 from scipy.fftpack import dct
 
+#frames = [skimage.io.imread("C:/Users/Zach/Desktop/movieFrames/frames_2003.77.00000075.bmp", as_grey=1)]
+#frames.append(skimage.io.imread("C:/Users/Zach/Desktop/movieFrames/frames_2003.77.00000076.bmp", as_grey=1))
+#frames = [skimage.io.imread("/Users/brian/Desktop/Abe.png", as_grey=1)]
+def imread_convert(f):
+            return skimage.io.imread(f, as_grey=1)
+#path = "/Users/brian/Desktop/VideoBliinds"
+#files = os.listdir(path)
+#wantedFiles = filter(,files)
+#re.search()
+#f1 = skimage.io.ImageCollection("/Users/brian/Desktop/VideoBliinds/*(0000000[6-9]|0000001[0-9]|0000002[0-9]|0000003[0-9]|0000004[0-5]).bmp", load_func=imread_convert)
+f1 = skimage.io.ImageCollection("/Users/brian/Desktop/VideoBliinds/*.bmp", load_func=imread_convert)
+#f1 = skimage.io.ImageCollection("/Users/brian/Desktop/VideoBliinds/*5.bmp", load_func=imread_convert)
+print f1
+#frames.append(skimage.io.imread("/Users/brian/Desktop/alien2.jpg", as_grey=1))
+#f2 = np.array(skimage.io.imread("/Users/brian/Desktop/Abe.png", as_grey=1))
+#f1 = np.expand_dims(f1,axis=3)
+#f2 = np.expand_dims(f2,axis=3)
+#print(f1.shape)
+#frames = np.concatenate((f1,f2),axis=2)
+frames = f1.concatenate()
+frames = np.swapaxes(frames,0,2)
+frames = np.swapaxes(frames,0,1)
+print "frames shape"
+print(frames.shape)
+
 #current path to image files:"C:/Users/Zach/Desktop/movieFrames/frames_2003.77.00000074.bmp"
 #path to niqe.py "C:/Users/Zach/Desktop/VideoBLIINDS_Code_MicheleSaad/niqe_features.py"
 def sorted_nicely(l): 
@@ -68,30 +93,6 @@ def fspecial(lw, sigma):#fspecial
     for ii in range(2 * lw + 1):
         weights[ii] /= sum
     return weights
-#frames = [skimage.io.imread("C:/Users/Zach/Desktop/movieFrames/frames_2003.77.00000075.bmp", as_grey=1)]
-#frames.append(skimage.io.imread("C:/Users/Zach/Desktop/movieFrames/frames_2003.77.00000076.bmp", as_grey=1))
-#frames = [skimage.io.imread("/Users/brian/Desktop/Abe.png", as_grey=1)]
-def imread_convert(f):
-            return skimage.io.imread(f, as_grey=1)
-#path = "/Users/brian/Desktop/VideoBliinds"
-#files = os.listdir(path)
-#wantedFiles = filter(,files)
-#re.search()
-#f1 = skimage.io.ImageCollection("/Users/brian/Desktop/VideoBliinds/*(0000000[6-9]|0000001[0-9]|0000002[0-9]|0000003[0-9]|0000004[0-5]).bmp", load_func=imread_convert)
-f1 = skimage.io.ImageCollection("/Users/brian/Desktop/VideoBliinds/*.bmp", load_func=imread_convert)
-#f1 = skimage.io.ImageCollection("/Users/brian/Desktop/VideoBliinds/*5.bmp", load_func=imread_convert)
-print f1
-#frames.append(skimage.io.imread("/Users/brian/Desktop/alien2.jpg", as_grey=1))
-#f2 = np.array(skimage.io.imread("/Users/brian/Desktop/Abe.png", as_grey=1))
-#f1 = np.expand_dims(f1,axis=3)
-#f2 = np.expand_dims(f2,axis=3)
-#print(f1.shape)
-#frames = np.concatenate((f1,f2),axis=2)
-frames = f1.concatenate()
-frames = np.swapaxes(frames,0,2)
-frames = np.swapaxes(frames,0,1)
-print "frames shape"
-print(frames.shape)
 
 def temporal_dc_variation_feature_extraction(frames):
     '''
