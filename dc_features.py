@@ -73,7 +73,13 @@ def fspecial(lw, sigma):#fspecial
 #frames = [skimage.io.imread("/Users/brian/Desktop/Abe.png", as_grey=1)]
 def imread_convert(f):
             return skimage.io.imread(f, as_grey=1)
+#path = "/Users/brian/Desktop/VideoBliinds"
+#files = os.listdir(path)
+#wantedFiles = filter(,files)
+#re.search()
+#f1 = skimage.io.ImageCollection("/Users/brian/Desktop/VideoBliinds/*(0000000[6-9]|0000001[0-9]|0000002[0-9]|0000003[0-9]|0000004[0-5]).bmp", load_func=imread_convert)
 f1 = skimage.io.ImageCollection("/Users/brian/Desktop/VideoBliinds/*.bmp", load_func=imread_convert)
+#f1 = skimage.io.ImageCollection("/Users/brian/Desktop/VideoBliinds/*5.bmp", load_func=imread_convert)
 print f1
 #frames.append(skimage.io.imread("/Users/brian/Desktop/alien2.jpg", as_grey=1))
 #f2 = np.array(skimage.io.imread("/Users/brian/Desktop/Abe.png", as_grey=1))
@@ -179,9 +185,9 @@ def costFuncMAD(currentBlk,refBlk, n):
     # err = 0;
     err = 0
     # for i = 1:n
-    for i in xrange(0,n - 1):
+    for i in xrange(0,n-1):
         # for j = 1:n
-        for j in xrange(0,n - 1):
+        for j in xrange(0,n-1):
             err = err + abs((currentBlk[i,j] - refBlk[i,j]))
             # err = err + abs((currentBlk(i,j) - refBlk(i,j)));
         # end
@@ -317,8 +323,8 @@ def motionEstNTSS(imgP, imgI,mbSize,p):
                                     # imgI(i:i+mbSize-1,j:j+mbSize-1),mbSize);
         # stepSize = stepMax; 
         # computations = computations + 1;
-            costs[1,1] = costFuncMAD(imgP[i:i+mbSize,j:j+mbSize],
-                                    imgI[i:i+mbSize,j:j+mbSize], mbSize)#approx (very close floating point) right
+            costs[1,1] = costFuncMAD(imgP[i:i+mbSize-1,j:j+mbSize-1],
+                                    imgI[i:i+mbSize-1,j:j+mbSize-1], mbSize)#approx (very close floating point) right
             stepSize = int(stepMax)#right
             computations = computations + 1#should be right
 
@@ -346,7 +352,6 @@ def motionEstNTSS(imgP, imgI,mbSize,p):
             # end
         # end
         
-        
         # % This is the calculation of the outer 8 points
         # % m is row(vertical) index
         # % n is col(horizontal) index
@@ -357,30 +362,34 @@ def motionEstNTSS(imgP, imgI,mbSize,p):
                     refBlkHor = x + n  # % col/Horizontal co-ordinate
                     print 'refBlkVer'
                     print refBlkVer
-                    print 'refBlkHor'
-                    print refBlkHor
                     print 'y'
                     print y
                     print 'm'
                     print m
+                    print 'refBlkHor'
+                    print refBlkHor
+                    print 'x'
+                    print x
                     print 'n'
                     print n
-                    if ( refBlkVer < 2 or refBlkVer+mbSize-2 > row \
-                         or refBlkHor < 2 or refBlkHor+mbSize-2 > col):
+                    if ( refBlkVer < 0 or refBlkVer+mbSize > row \
+                         or refBlkHor < 0 or refBlkHor+mbSize > col):
                          print "continue1"
                          continue
                     # end
 
-                    costRow = m/stepSize + 2
-                    costCol = n/stepSize + 2
+                    costRow = m/stepSize + 1
+                    costCol = n/stepSize + 1
+                    print "stepSize"
+                    print stepSize
+                    print "costRow"
+                    print costRow
+                    print "costCol"
+                    print costCol
                     if (costRow == 2 and costCol == 2):
                         print "continue2"
                         continue
                     # end
-                    print "costRow"
-                    print costRow
-                    print "costColumn"
-                    print costColumn
                     costs[costRow, costCol] = costFuncMAD(imgP[i:i+mbSize-1,j:j+mbSize-1], \
                         imgI[refBlkVer:refBlkVer+mbSize-1, refBlkHor:refBlkHor+mbSize-1], mbSize);
                     computations = computations + 1
@@ -445,8 +454,8 @@ def motionEstNTSS(imgP, imgI,mbSize,p):
                          continue
                     #end
 
-                    costRow = m/stepSize + 2
-                    costCol = n/stepSize + 2
+                    costRow = m/stepSize + 1
+                    costCol = n/stepSize + 1
                     if (costRow == 2 and costCol == 2):
                         continue
                     #end
@@ -610,16 +619,16 @@ def motionEstNTSS(imgP, imgI,mbSize,p):
                            # print refBlkVer
                            # print 'refBlkHor'
                            # print refBlkHor
-                            if ( refBlkVer < 0 or refBlkVer + mbSize > row \
-                                   or refBlkHor < 0 or refBlkHor + mbSize > col):
+                            if ( refBlkVer < 0 or refBlkVer + mbSize - 1 > row \
+                                   or refBlkHor < 0 or refBlkHor + mbSize - 1 > col):
                                 continue
                             
                             if ( (refBlkVer >= i  and refBlkVer <= i) \
                                     and (refBlkHor >= j  and refBlkHor <= j) ):
                                 continue
                           
-                            costRow = m/stepSize + 2
-                            costCol = n/stepSize + 2
+                            costRow = m/stepSize + 1
+                            costCol = n/stepSize + 1
                             if (costRow == 2 and costCol == 2):
                                 continue
                             
@@ -647,7 +656,7 @@ def motionEstNTSS(imgP, imgI,mbSize,p):
             elif (NTSSFlag == 0):
                     # % this is when we are going about doing normal TSS business
                     costs = ones((3,3), Float) * 65537;
-                    costs[2,2] = min1
+                    costs[1,1] = min1
                     stepSize = stepMax / 2
                     while(stepSize >= 1):
                         for m in xrange(-stepSize, stepSize, stepSize):
@@ -658,8 +667,8 @@ def motionEstNTSS(imgP, imgI,mbSize,p):
                                     or refBlkHor < 0 or refBlkHor+mbSize > col):
                                     continue
 
-                                costRow = m/stepSize + 2;
-                                costCol = n/stepSize + 2;
+                                costRow = m/stepSize + 1;
+                                costCol = n/stepSize + 1;
                                 if (costRow == 2 and costCol == 2):
                                     continue
                                 costs[costRow, costCol] = costFuncMAD(imgP[i:i+mbSize-1,j:j+mbSize-1], \
@@ -683,9 +692,17 @@ def motionEstNTSS(imgP, imgI,mbSize,p):
             vectors[1,mbCount] = x - j  #  % col co-ordinate for the vector            
             mbCount = mbCount + 1
             costs = ones((3,3), float) * 65537
+            #print 'vectors'
+            #print vectors
+            #print 'mbCount'
+            #print mbCount
     motionVect = vectors
+    #print 'motionVect'
+    #print motionVect
     #NTSSComputations = computations/(mbCount - 1) original, but set mbCount to 0
     NTSSComputations = computations/(mbCount)
+    #print 'NTSSComputations'
+    #print NTSSComputations
     return motionVect, NTSSComputations
 
 
@@ -711,9 +728,6 @@ for x in xrange(frames.shape[2] - 1):#xrange is inclusive at beginning, exclusiv
 print frames[0].size
 print frames[0].shape
 print len(frames)
-    
-
-    
     
 # mbsize = 16;
 # row = size(frames,1);

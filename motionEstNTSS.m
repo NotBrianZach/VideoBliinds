@@ -98,6 +98,7 @@ for i = 1 : mbSize : row-mbSize+1
 
                 costRow = m/stepSize + 2;
                 costCol = n/stepSize + 2;
+                stepSize
                 costRow
                 costCol
                 if (costRow == 2 && costCol == 2)
@@ -135,7 +136,6 @@ for i = 1 : mbSize : row-mbSize+1
                      || refBlkHor < 1 || refBlkHor+mbSize-1 > col)
                      continue;
                 end
-
                 costRow = m/stepSize + 2;
                 costCol = n/stepSize + 2;
                 if (costRow == 2 && costCol == 2)
@@ -249,7 +249,7 @@ for i = 1 : mbSize : row-mbSize+1
                 [dx, dy, min] = minCost(costs);      % finds which macroblock in imgI gave us min Cost
             
             
-                % shift the root for search window to new minima point
+                %shift the root for search window to new minima point
 
                 x = x + (dx-2)*stepSize;
                 y = y + (dy-2)*stepSize;
