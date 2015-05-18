@@ -48,16 +48,18 @@ h=fspecial('gaussian',mblock);
 
 for x=1:size(frames,3)-1
    % x
-   % tic
+    tic
     imgP = double(frames(:,:,x+1));
     imgI = double(frames(:,:,x));
-    'imgP'
-    size(imgP)
-    'imgI'
-    size(imgI)
+%     'imgP'
+%     size(imgP)
+%     'imgI'
+%     size(imgI)
     [motion_vects16x16(:,:,x) temp] = motionEstNTSS(imgP,imgI,mblock,7);
+    'done'
     toc
 end
+motion_vects16x16
 
 
 mbsize = 16;
@@ -67,8 +69,8 @@ col = size(frames,2);
 for x=1:size(frames,3)-1
     x;
     mbCount = 1;
-    for i = 1 :mbsize : row-mbsize+1
-        for j = 1 :mbsize : col-mbsize+1
+    for i = 1 : mbsize : row-mbsize+1
+        for j = 1 : mbsize : col-mbsize+1
 %             'hi, frames'
 %             size(frames)
 %             'motion_vects'

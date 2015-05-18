@@ -279,7 +279,7 @@ def motionEstNTSS(imgP, imgI,mbSize,p):
 # stepMax = 2^(L-1);
 
 # computations = 0;
-    L = floor(math.log10(p+1)/ math.log10(2))#right
+    L = floor(math.log10(p+1) / math.log10(2))#right
     stepMax = pow(2,(L-1))#right
 
     computations = 0;
@@ -463,6 +463,8 @@ def motionEstNTSS(imgP, imgI,mbSize,p):
 
                     costs[costRow, costCol] = costFuncMAD(imgP[i:i+mbSize-1,j:j+mbSize-1], \
                         imgI[refBlkVer:refBlkVer+mbSize-1, refBlkHor:refBlkHor+mbSize-1], mbSize)
+                    print "costs"
+                    print costs
                     computations = computations + 1
             
             
@@ -635,6 +637,8 @@ def motionEstNTSS(imgP, imgI,mbSize,p):
                             
                             costs[costRow, costCol] = costFuncMAD(imgP[i:i+mbSize-1,j:j+mbSize-1], \
                                  imgI[refBlkVer:refBlkVer+mbSize-1, refBlkHor:refBlkHor+mbSize-1], mbSize)
+                            print "costs"
+                            print costs
                             computations = computations + 1;
                            # print 'costRow'
                            # print costRow
@@ -674,6 +678,8 @@ def motionEstNTSS(imgP, imgI,mbSize,p):
                                     continue
                                 costs[costRow, costCol] = costFuncMAD(imgP[i:i+mbSize-1,j:j+mbSize-1], \
                                         imgI[refBlkVer:refBlkVer+mbSize-1, refBlkHor:refBlkHor+mbSize-1], mbSize)
+                                print "costs"
+                                print costs
                                 computations = computations + 1
                 
                         # % Now we find the vector where the cost is minimum
@@ -698,8 +704,8 @@ def motionEstNTSS(imgP, imgI,mbSize,p):
             #print 'mbCount'
             #print mbCount
     motionVect = vectors
-    #print 'motionVect'
-    #print motionVect
+    print 'motionVect'
+    print motionVect
     #NTSSComputations = computations/(mbCount - 1) original, but set mbCount to 0
     NTSSComputations = computations/(mbCount)
     #print 'NTSSComputations'
@@ -709,19 +715,28 @@ def motionEstNTSS(imgP, imgI,mbSize,p):
 
  #COMPUTING DC COEFFICIENT CONTINUED NOW THAT WE HAVE THE FUNCTION WE NEED
     
-    
-motion_vects16x16 = []
+mbsize = 16
+imgI = frames[:,:,0]
+row, col = imgI.shape#right
+motion_vects16x16 = zeros(shape=(2,row*col/mbsize**2,frames.shape[2]-1))
+print 'motion_vects'
+print motion_vects16x16.shape
 for x in xrange(frames.shape[2] - 1):#xrange is inclusive at beginning, exclusive at end
-        #print x
-        #print "HOW MANY FRAMES WE GOT?"
-        #print frames.shape[2]
-        #print frames[:,:,1]
+    #print x
+    print "HOW MANY FRAMES WE GOT?"
+    #print frames.shape[2]
+    #print frames[:,:,1]
     # imgP = double(frames[x+1])
     # imgI = double(frames[x])
     imgP = frames[:,:,x+1]
     imgI = frames[:,:,x]
-    #motion_vects16x16[x] = [][]
-    motion_vects16x16, temp = motionEstNTSS(imgP,imgI,mblock,7)
+   # motion_vects16x16 = [0][0][0]
+# vectors = zeros(2,row*col/mbSize^2);
+# costs = ones(3, 3) * 65537;
+
+    #vectors = zeros((2,row*col/mbsize**2),float)#right
+
+    motion_vects16x16[:,:,x], temp = motionEstNTSS(imgP,imgI,mblock,7)
     #print "Motion vects"
     #print motion_vects16x16
     #toc
@@ -734,9 +749,8 @@ print len(frames)
 # row = size(frames,1);
 # col = size(frames,2);
 
-mbsize = 16;
-row = frames.shape[0];
-col = frames.shape[1];
+row = frames.shape[0]
+col = frames.shape[1]
 
 # for x=1:size(frames,3)-1
     # x;
@@ -764,9 +778,6 @@ for x in xrange(0,frames.shape[2]):
             print motion_vects16x16
             dct_motion_comp_diff[i:i+mbsize-1,j:j+mbsize-1,x] = dct(dct(np.pad(frames[i:i+mbsize-1,j:j+mbsize-1,x+1]-frames[i+motion_vects16x16[1,mbCount,x]:i+mbsize-1+motion_vects16x16[1,mbCount,x],j+motion_vects16x16[2,mbCount,x]:j+mbsize-1+motion_vects16x16[2,mbCount,x],x]).T).T);
             mbCount = mbCount + 1
-        end
-    end
-end
 
 # for i = 1:size(frames,3)-1
     # temp = im2col(dct_motion_comp_diff(:,:,i),[16,16],'distinct');

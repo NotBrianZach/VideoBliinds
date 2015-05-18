@@ -84,32 +84,32 @@ for i = 1 : mbSize : row-mbSize+1
             for n = -stepSize : stepSize : stepSize
                 refBlkVer = y + m;   % row/Vert co-ordinate for ref block
                 refBlkHor = x + n;   % col/Horizontal co-ordinate
-                refBlkVer
-                y
-                m
-                refBlkHor
-                x
-                n
+%                 refBlkVer
+%                 y
+%                 m
+%                 refBlkHor
+%                 x
+%                 n
                 if ( refBlkVer < 1 || refBlkVer+mbSize-1 > row ...
                      || refBlkHor < 1 || refBlkHor+mbSize-1 > col)
-                     'continue1'
+%                      'continue1'
                      continue;
                 end
 
                 costRow = m/stepSize + 2;
                 costCol = n/stepSize + 2;
-                stepSize
-                costRow
-                costCol
+%                 stepSize
+%                 costRow
+%                 costCol
                 if (costRow == 2 && costCol == 2)
-                    'continue2'
+%                     'continue2'
                     continue
                 end
                 costs(costRow, costCol ) = costFuncMAD(imgP(i:i+mbSize-1,j:j+mbSize-1), ...
                     imgI(refBlkVer:refBlkVer+mbSize-1, refBlkHor:refBlkHor+mbSize-1), mbSize);
                 costs
                 computations = computations + 1;
-                computations
+%                 computations
             end
         end
         
@@ -143,6 +143,7 @@ for i = 1 : mbSize : row-mbSize+1
                 end
                 costs(costRow, costCol ) = costFuncMAD(imgP(i:i+mbSize-1,j:j+mbSize-1), ...
                     imgI(refBlkVer:refBlkVer+mbSize-1, refBlkHor:refBlkHor+mbSize-1), mbSize);
+                costs
                 computations = computations + 1;
             end
         end
@@ -203,6 +204,7 @@ for i = 1 : mbSize : row-mbSize+1
                     end
                     costs(costRow, costCol ) = costFuncMAD(imgP(i:i+mbSize-1,j:j+mbSize-1), ...
                          imgI(refBlkVer:refBlkVer+mbSize-1, refBlkHor:refBlkHor+mbSize-1), mbSize);
+                    costs
                     computations = computations + 1;
                 end
             end
@@ -239,7 +241,6 @@ for i = 1 : mbSize : row-mbSize+1
                         costs(costRow, costCol) = costFuncMAD(imgP(i:i+mbSize-1,j:j+mbSize-1), ...
                                 imgI(refBlkVer:refBlkVer+mbSize-1, refBlkHor:refBlkHor+mbSize-1), mbSize);
                         computations = computations + 1;
-                    
                     end
                 end
         
@@ -266,7 +267,8 @@ for i = 1 : mbSize : row-mbSize+1
         costs = ones(3,3) * 65537;
     end
 end
-
 motionVect = vectors;
+'motionVect'
+
 NTSScomputations = computations/(mbCount - 1);
                     
