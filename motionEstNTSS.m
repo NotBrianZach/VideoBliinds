@@ -40,7 +40,7 @@ computations = 0;%right
 
 % we start off from the top left of the image
 % we will walk in steps of mbSize
-% for every marcoblock that we look at we will look for
+% for every macroblock that we look at we will look for
 % a close match p pixels on the left, right, top and bottom of it
 
 mbCount = 1;
@@ -105,7 +105,7 @@ for i = 1 : mbSize : row-mbSize+1
 %                     'continue2'
                     continue
                 end
-                costs(costRow, costCol ) = costFuncMAD(imgP(i:i+mbSize-1,j:j+mbSize-1), ...
+                costs(costRow, costCol) = costFuncMAD(imgP(i:i+mbSize-1,j:j+mbSize-1), ...
                     imgI(refBlkVer:refBlkVer+mbSize-1, refBlkHor:refBlkHor+mbSize-1), mbSize);
                 costs
                 computations = computations + 1;
@@ -143,7 +143,6 @@ for i = 1 : mbSize : row-mbSize+1
                 end
                 costs(costRow, costCol ) = costFuncMAD(imgP(i:i+mbSize-1,j:j+mbSize-1), ...
                     imgI(refBlkVer:refBlkVer+mbSize-1, refBlkHor:refBlkHor+mbSize-1), mbSize);
-                costs
                 computations = computations + 1;
             end
         end
@@ -204,7 +203,6 @@ for i = 1 : mbSize : row-mbSize+1
                     end
                     costs(costRow, costCol ) = costFuncMAD(imgP(i:i+mbSize-1,j:j+mbSize-1), ...
                          imgI(refBlkVer:refBlkVer+mbSize-1, refBlkHor:refBlkHor+mbSize-1), mbSize);
-                    costs
                     computations = computations + 1;
                 end
             end
