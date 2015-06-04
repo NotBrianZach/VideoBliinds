@@ -11,7 +11,7 @@ blockcoloverlap = 0;
  
 for fr = 6 : size(frames,3)-5
     %fr
-    [mu qq] = computequality(frames(:,:,fr), blocksizerow,blocksizecol,blockrowoverlap,blockcoloverlap,mu_prisparam,cov_prisparam);
+    [mu qq] = computequality(frames(:,:,fr),blocksizerow,blocksizecol,blockrowoverlap,blockcoloverlap,mu_prisparam,cov_prisparam);
     niqe_feat(fr-5,1:36) = mu;
     niqe_feat(fr-5,37) = qq;
     clear mu qq

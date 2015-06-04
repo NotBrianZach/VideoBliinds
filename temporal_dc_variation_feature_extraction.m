@@ -1,7 +1,6 @@
 %% Computing the DC temporal variation
 %% feature a.k.a. the DC feature
 
-
 function dt_dc_measure1 = temporal_dc_variation_feature_extraction(frames)
 
 
@@ -48,7 +47,7 @@ h=fspecial('gaussian',mblock);
 
 for x=1:size(frames,3)-1
    % x
-    tic
+    %tic;
     imgP = double(frames(:,:,x+1));
     imgI = double(frames(:,:,x));
 %     'imgP'
@@ -56,11 +55,10 @@ for x=1:size(frames,3)-1
 %     'imgI'
 %     size(imgI)
     [motion_vects16x16(:,:,x) temp] = motionEstNTSS(imgP,imgI,mblock,7);
-    'done'
-    toc
+%     'done'
+    %toc;
 end
-motion_vects16x16
-
+motion_vects16x16(1,31:90)
 
 mbsize = 16;
 row = size(frames,1);
@@ -85,15 +83,19 @@ end
 
 for i = 1:size(frames,3)-1
     temp = im2col(dct_motion_comp_diff(:,:,i),[16,16],'distinct');
+    temp
     std_dc(i) = std(temp(1,:));
 end
+%std_dc
+%'im2colDistinct motion comp diff'
+%size(dct_motion_comp_diff)
 clear *motion*
-
 
 
 for i = 1:length(std_dc)-1
     dt_dc_temp(i) = abs(std_dc(i+1)-std_dc(i));
 end
-1
+'dt_dc_temp'
+size(dt_dc_temp)
 dt_dc_measure1 = mean(dt_dc_temp);
  

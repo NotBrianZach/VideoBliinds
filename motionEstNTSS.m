@@ -21,7 +21,7 @@ function [motionVect, NTSScomputations] = motionEstNTSS(imgP, imgI, mbSize, p)
 
 [row col] = size(imgI);%right
 
-vectors = zeros(2,row*col/mbSize^2);%right dimensions anyway
+vectors = zeros(2,round(row*col/mbSize^2));%right dimensions anyway
 % 'vectors'
 % size(vectors)
 %vectors
@@ -107,7 +107,7 @@ for i = 1 : mbSize : row-mbSize+1
                 end
                 costs(costRow, costCol) = costFuncMAD(imgP(i:i+mbSize-1,j:j+mbSize-1), ...
                     imgI(refBlkVer:refBlkVer+mbSize-1, refBlkHor:refBlkHor+mbSize-1), mbSize);
-                costs
+%                 costs
                 computations = computations + 1;
 %                 computations
             end
@@ -266,7 +266,6 @@ for i = 1 : mbSize : row-mbSize+1
     end
 end
 motionVect = vectors;
-'motionVect'
 
 NTSScomputations = computations/(mbCount - 1);
                     

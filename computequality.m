@@ -1,5 +1,5 @@
 function  [mu_distparam quality] = computequality(im,blocksizerow,blocksizecol,...
-    blockrowoverlap,blockcoloverlap,mu_prisparam,cov_prisparam)
+blockrowoverlap,blockcoloverlap,mu_prisparam,cov_prisparam)
    
 % Input
 % im              - Image whose quality needs to be computed
@@ -11,7 +11,7 @@ function  [mu_distparam quality] = computequality(im,blocksizerow,blocksizecol,.
 % cov_prisparam   - covariance of multivariate Gaussian model
 
 % For good performance, it is advisable to use make the multivariate Gaussian model
-% using same size patches as the distorted image is divided in to
+% using same size patches as the distorted image is divided in tov
 
 % Output
 %quality      - Quality of the input distorted image
