@@ -58,8 +58,8 @@ for x=1:size(frames,3)-1
 %     'done'
     %toc;
 end
-motion_vects16x16(1,31:90)
-
+motion_vects16x16;
+save('~/Desktop/VideoBliinds/matlabarray','motion_vects16x16','-ascii');
 mbsize = 16;
 row = size(frames,1);
 col = size(frames,2);
@@ -69,10 +69,6 @@ for x=1:size(frames,3)-1
     mbCount = 1;
     for i = 1 : mbsize : row-mbsize+1
         for j = 1 : mbsize : col-mbsize+1
-%             'hi, frames'
-%             size(frames)
-%             'motion_vects'
-%             size(motion_vects16x16)
             dct_motion_comp_diff(i:i+mbsize-1,j:j+mbsize-1,x) = dct2(frames(i:i+mbsize-1,j:j+mbsize-1,x+1)-frames(i+motion_vects16x16(1,mbCount,x):i+mbsize-1+motion_vects16x16(1,mbCount,x),j+motion_vects16x16(2,mbCount,x):j+mbsize-1+motion_vects16x16(2,mbCount,x),x));
             mbCount = mbCount+1;
         end
@@ -80,10 +76,9 @@ for x=1:size(frames,3)-1
 end
 
 
-
 for i = 1:size(frames,3)-1
     temp = im2col(dct_motion_comp_diff(:,:,i),[16,16],'distinct');
-    temp
+    %temp
     std_dc(i) = std(temp(1,:));
 end
 %std_dc

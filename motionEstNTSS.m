@@ -38,6 +38,7 @@ stepMax = 2^(L-1);%right
 % stepMax
 computations = 0;%right
 
+overallcosts = zeros(3,3);
 % we start off from the top left of the image
 % we will walk in steps of mbSize
 % for every macroblock that we look at we will look for
@@ -230,7 +231,6 @@ for i = 1 : mbSize : row-mbSize+1
                             || refBlkHor < 1 || refBlkHor+mbSize-1 > col)
                             continue;
                         end
-
                         costRow = m/stepSize + 2;
                         costCol = n/stepSize + 2;
                         if (costRow == 2 && costCol == 2)
@@ -258,13 +258,16 @@ for i = 1 : mbSize : row-mbSize+1
             
             end
         end
-
+        overallcosts = [overallcosts; costs];
+        %cat(3,overallcosts,costs)
         vectors(1,mbCount) = y - i;    % row co-ordinate for the vector
         vectors(2,mbCount) = x - j;    % col co-ordinate for the vector            
         mbCount = mbCount + 1;
         costs = ones(3,3) * 65537;
     end
 end
+%save('~/Desktop/VideoBliinds/matlaboverallcosts','overallcosts','-ascii');
+save('~/Desktop/VideoBliinds/matlaboverallcosts','overallcosts');
 motionVect = vectors;
 
 NTSScomputations = computations/(mbCount - 1);

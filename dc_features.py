@@ -20,6 +20,7 @@ import glob
 import time
 import re
 import skimage
+import pickle
 from skimage.feature import hog
 from skimage import data, color, exposure
 from sklearn.externals import joblib
@@ -137,6 +138,8 @@ def motionEstNTSS(imgP, imgI, mbSize, p):
     row1, col1 = imgP.shape
     vectors = np.zeros((2,row*col/mbSize**2),np.float)#right
     costs = np.ones((3, 3), float) * 65537#right
+    allcosts = np.empty(shape=(1,3,3))
+    costfile = open("./pythoncosts", "wb");
 
     L = int(np.log(p+1)/np.log(2.0))
     stepMax = pow(2,(L-1))#right
@@ -273,21 +276,21 @@ def motionEstNTSS(imgP, imgI, mbSize, p):
                     
                         stepSize = int(stepSize / 2)
                         costs[1,1] = costs[dy,dx]
-
+            allcosts = np.append(allcosts,[costs],axis=0)
             vectors[0,mbCount] = y - i  #  % row co-ordinate for the vector
             vectors[1,mbCount] = x - j  #  % col co-ordinate for the vector            
             mbCount += 1
             costs = ones((3,3), np.float) * 65537
+    allcosts.dump(costfile)
     motionVect = vectors
     #print 'motionVect'
     #print motionVect
     #NTSSComputations = computations/(mbCount - 1) original, but set mbCount to 0
-    NTSSComputations = computations/(mbCount)
+    NTSSComputations = computations/(mbCount - 1)#however computations also starts at 0 in the matlab code.
     return motionVect, NTSSComputations
 
 
- #COMPUTING DC COEFFICIENT CONTINUED NOW THAT WE HAVE THE FUNCTION WE NEED
-
+#COMPUTING DC COEFFICIENT CONTINUED NOW THAT WE HAVE THE FUNCTION WE NEED
 def im2colDistinct(A, size):
     dx, dy = size
     #assert A.shape[0] % dy == 0
@@ -298,8 +301,10 @@ def im2colDistinct(A, size):
     else:
         AA = A
     
-    mblocks = AA.shape[0] % size[0]
-    nblocks = AA.shape[1] % size[1]
+    mblocks = AA.shape[0] / size[0]
+    nblocks = AA.shape[1] / size[1]
+    mblocks = int(mblocks) 
+    nblocks = int(nblocks) 
     #rows = 0:size[0]
     #cols = 0:size[1]
     
@@ -312,14 +317,18 @@ def im2colDistinct(A, size):
     for i in xrange(0, mblocks-1):
         for j in xrange(0, nblocks-1):
             #x[:] = AA[i * size[0] + rows , j * size[1] + cols]
-            # what is this doing?
+            #what is this doing?
             #we're inserting new columns into x equal to the slice of A over the first axis
             #from i*size[0] + rows intersected with the slice of A over the second axis
             #from j*size[1] + cols
             #size is the matrix which tells you how big the blocks are.
             #adding i * size[0] to each slice should produce a new slice that starts and ends
             #at numbers that much higher.
-            x[:] = AA[(i * size[0]):((i +1) * size[0]),(j * size[1]):((j + 1) * size[1])]
+            x[:] = AA[(i * size[0]):((i + 1) * size[0]),(j * size[1]):((j + 1) * size[1])]
+            print 'x'
+            print x
+            #TODO- but it seems like the block size of the index slicing wouldn't fit into a single vector!
+            #maybe there's some magic sauce in the matlab implementation?
             b[:,i+j*mblocks+1] = x
     return b
     #ncol = (A.shape[0]/dx) * (A.shape[1]/dy)
@@ -341,33 +350,72 @@ def temporal_dc_variation_feature_extraction(frames):
     col = frames.shape[1]
         
     motion_vects = zeros(shape=(2,row*col/mbsize**2,frames.shape[2]-1))
-    for x in xrange(5,frames.shape[2]-1):#xrange is inclusive at beginning, exclusive at end,start at 6th frame
+    for x in xrange(5,frames.shape[2]-1):#xrange is inclusive at beginning, exclusive at end,start at 6th frame,end 1 early since x+1
         imgP = frames[:,:,x+1]
         imgI = frames[:,:,x]
         motion_vects[:,:,x], temp = motionEstNTSS(imgP,imgI,mblock,7)
+    print "Motion vects"
+    print motion_vects
     
-    for x in xrange(0,frames.shape[2]-1):
+    motion_vects.dump(open("./pythonarray", "wb"))
+    dct_motion_comp_diff = zeros(shape=(row,col,frames.shape[2]))
+    for x in xrange(0,frames.shape[2]):
         mbCount = 0
-        dct_motion_comp_diff = zeros(shape=(mbsize,mbsize,frames.shape[2]-1))
-        for i in xrange(0,mbsize,row-mbsize + 1):
-            for j in xrange(0,mbsize,col-mbsize + 1):
-                #what arrays are there in here?
-                #dct_motion_comp_diff : a new array, 3d
-                # frames
+        for i in xrange(0,row-mbsize-1,mbsize):
+            for j in xrange(0,col-mbsize-1,mbsize):
                 #dct_motion_comp_diff(i:i+mbsize-1,j:j+mbsize-1,x) = dct2(frames(i:i+mbsize-1,j:j+mbsize-1,x+1)-frames(i+motion_vects16x16(1,mbCount,x):i+mbsize-1+motion_vects16x16(1,mbCount,x),j+motion_vects16x16(2,mbCount,x):j+mbsize-1+motion_vects16x16(2,mbCount,x),x));
                 #dct_motion_comp_diff[i:i+mbsize,j:j+mbsize-1,x] = dct(dct(np.pad(frames[i:i+mbsize-1,j:j+mbsize-1,x+1]-frames[i+motion_vects[0,mbCount,x]:i+mbsize-1+motion_vects[0,mbCount,x],j+motion_vects[1,mbCount,x]:j+mbsize-1+motion_vects[1,mbCount,x],x]).T).T);
-                dct_motion_comp_diff[i:i+mbsize-1,j:j+mbsize-1,x] = dct(dct((frames[i:i+mbsize-1,j:j+mbsize-1,x+1]-frames[i+motion_vects[0,mbCount,x]:i+mbsize-1+motion_vects[0,mbCount,x],j+motion_vects[1,mbCount,x]:j+mbsize-1+motion_vects[1,mbCount,x],x]).astype(np.float)).T);
+                print frames[i:i+mbsize-1,j:j+mbsize-1,x+1].shape
+                print frames[i+motion_vects[0,mbCount,x]:i+mbsize-1+motion_vects[0,mbCount,x],j+motion_vects[1,mbCount,x]:j+mbsize-1+motion_vects[1,mbCount,x],x].shape
+                #if (i+motion_vects[0,mbCount,x] < 0 or j+motion_vects[1,mbCount,x] < 0):
+                #        #need more if statements.
+                #    tempMatrix1 = zeros(mbsize-1,mbsize-1,frames.shape[2])
+                #    tempMatrix2 = zeros(mbsize-1,mbsize-1,frames.shape[2])
+                #    if (i+motion_vects[0,mbCount,x] < 0 and i+mbsize-1+motion_vects[0,mbCount,x] < 0):
+                #            #tempMatrix1 = frames[i+motion_vects[0,mbCount,x]:i+mbsize-1+motion_vects[0,mbCount,x],j+motion_vects[1,mbCount,x]:j+mbsize-1+motion_vects[1,mbCount,x],x].shape
+                #            #here we add the negative row values to the max value
+                #        dct_motion_comp_diff[i:i+mbsize-1,j:j+mbsize-1,x] += dct(dct((frames[i:i+mbsize-1,j:j+mbsize-1,x+1]-
+                #                frames[row + (i+motion_vects[0,mbCount,x]):row + (i+mbsize-1+motion_vects[0,mbCount,x]),
+                #                j+motion_vects[1,mbCount,x]:j+mbsize-1+motion_vects[1,mbCount,x],x]).astype(np.float)).T);
+                #    else if (i+motion_vects[0,mbCount,x] < 0 and i+mbsize-1+motion_vects[0,mbCount,x] > 0):
+                #        dct_motion_comp_diff[i:i+mbsize-1,j:j+mbsize-1,x] += dct(dct((frames[i:i+mbsize-1,j:j+mbsize-1,x+1]-
+                #                frames[i+motion_vects[0,mbCount,x]:i+mbsize-1+motion_vects[0,mbCount,x],
+                #                j+motion_vects[1,mbCount,x]:j+mbsize-1+motion_vects[1,mbCount,x],x]).astype(np.float)).T);
+                #            #tempMatrix1 = frames[i+motion_vects[0,mbCount,x]:i+mbsize-1+motion_vects[0,mbCount,x],j+motion_vects[1,mbCount,x]:j+mbsize-1+motion_vects[1,mbCount,x],x].shape
+                #    if (j+motion_vects[0,mbCount,x] < 0 and j+mbsize-1+motion_vects[0,mbCount,x] < 0):
+                #        dct_motion_comp_diff[i:i+mbsize-1,j:j+mbsize-1,x] += dct(dct((frames[i:i+mbsize-1,j:j+mbsize-1,x+1]-
+                #                frames[i+motion_vects[0,mbCount,x]:i+mbsize-1+motion_vects[0,mbCount,x],
+                #                j+motion_vects[1,mbCount,x]:j+mbsize-1+motion_vects[1,mbCount,x],x]).astype(np.float)).T);
+                #            #tempMatrix2 = frames[i+motion_vects[0,mbCount,x]:i+mbsize-1+motion_vects[0,mbCount,x],col+(j+motion_vects[1,mbCount,x]):col+(j+mbsize-1+motion_vects[1,mbCount,x]),x].shape
+                #            #don't have to worry about indexing over nonexistent stuff, numpy just ignores indeces past the max.
+                #    else if (j+motion_vects[0,mbCount,x] < 0 and j+mbsize-1+motion_vects[0,mbCount,x] > 0):
+                #        dct_motion_comp_diff[i:i+mbsize-1,j:j+mbsize-1,x] += dct(dct((frames[i:i+mbsize-1,j:j+mbsize-1,x+1]-
+                #                frames[i+motion_vects[0,mbCount,x]:i+mbsize-1+motion_vects[0,mbCount,x],
+                #                j+motion_vects[1,mbCount,x]:j+mbsize-1+motion_vects[1,mbCount,x],x]).astype(np.float)).T);
+                #            #tempMatrix2 = frames[i+motion_vects[0,mbCount,x]:i+mbsize-1+motion_vects[0,mbCount,x],j+motion_vects[1,mbCount,x]:j+mbsize-1+motion_vects[1,mbCount,x],x].shape
+                #    dct_motion_comp_diff[i:i+mbsize-1,j:j+mbsize-1,x] += dct(dct((frames[i:i+mbsize-1,j:j+mbsize-1,x+1]-
+                #            frames[i+motion_vects[0,mbCount,x]:i+mbsize-1+motion_vects[0,mbCount,x],
+                #            j+motion_vects[1,mbCount,x]:j+mbsize-1+motion_vects[1,mbCount,x],x]).astype(np.float)).T);
+                #    #TODO some kind of weird array concatenation?
+                #else:
+                dct_motion_comp_diff[i:i+mbsize-1,j:j+mbsize-1,x] = dct(dct((frames[i:i+mbsize-1,j:j+mbsize-1,x+1]-
+                            frames[i+motion_vects[0,mbCount,x]:i+mbsize-1+motion_vects[0,mbCount,x],
+                            j+motion_vects[1,mbCount,x]:j+mbsize-1+motion_vects[1,mbCount,x],x]).astype(np.float)).T);
                 mbCount = mbCount + 1
 
+    print "dct_motion_comp_diff"
     print dct_motion_comp_diff
 
     std_dc = zeros(shape=(frames.shape[2]-1))
     for i in xrange(0,frames.shape[2]-1):
         temp = im2colDistinct(dct_motion_comp_diff[:,:,i],(16,16));
         #this returns a 16*16 vector....why? wouldn't I want something that corresponds to the height and width of dct_motion_comp_diff?
-        #print 'temp im2colDistinct'
-        #print temp
-        std_dc[i] = np.std(temp[:])
+        #by sheer coincedence, dct_motion_comp_diff is 16x16, this is set by mbsize.
+        
+        print 'temp im2colDistinct'
+        print temp
+        #TODO-current error is here some kind of weird numpy broadcasting thing or something.,
+        #also, there may be an error with 
     #print 'std_dc'
     #print std_dc
     #print 'im2col motioncompdiff'
